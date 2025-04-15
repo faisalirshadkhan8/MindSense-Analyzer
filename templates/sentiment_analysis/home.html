@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load sentiment_tags %}
+
+{% block extra_css %}
+<!-- Animate.css for animations -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section with enhanced design and animation -->
+<section class="hero animate__animated animate__fadeIn position-relative overflow-hidden py-5">
+    <!-- Animated background elements -->
+    <div class="position-absolute hero-bg-elements">
+        <div class="hero-bubble bubble-1"></div>
+        <div class="hero-bubble bubble-2"></div>
+        <div class="hero-bubble bubble-3"></div>
+        <div class="hero-shape shape-1"></div>
+        <div class="hero-shape shape-2"></div>
+    </div>
+    
+    <div class="container position-relative">
+        <div class="row align-items-center">
+            <div class="col-lg-7 mx-auto text-center">
+                <div class="mb-4">
+                    <span class="badge bg-white bg-opacity-25 text-white px-3 py-2 rounded-pill fw-normal mb-3">
+                        <i class="fas fa-brain me-1"></i> Advanced Sentiment Analysis
+                    </span>
+                </div>
+                <h1 class="hero-title display-4 fw-bold animate__animated animate__slideInDown mb-3">
+                    Mental Health <span class="text-gradient">Analysis</span>
+                </h1>
+                <p class="hero-subtitle fs-5 animate__animated animate__slideInUp mb-5 text-white-75">
+                    Understand your emotions through advanced sentiment analysis and get personalized insights
+                </p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="#analysis-section" class="btn btn-primary btn-lg">
+                        <i class="fas fa-arrow-down me-2"></i> Get Started
+                    </a>
+                    <a href="#info-section" class="btn btn-outline-light btn-lg">
+                        Learn More <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Analysis Section with card shadow and improved layout -->
+<section id="analysis-section" class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="mb-2">Express Your Feelings</h2>
+            <p class="lead text-muted">Share what's on your mind, and we'll analyze the sentiment behind your words</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm animate__animated animate__fadeIn">
+                    <div class="card-body p-4">
+                        <div class="text-center mb-4">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-primary text-white rounded-circle mb-3" style="width: 80px; height: 80px">
+                                <i class="fas fa-comment-dots fa-2x"></i>
+                            </div>
+                            <h3 class="card-title">How are you feeling today?</h3>
+                        </div>
+                        
+                        <form id="sentimentForm" method="post" action="{% url 'sentiment_analysis:home' %}">
+                            {% csrf_token %}
+                            <div class="mb-4">
+                                <textarea class="form-control" id="floatingTextarea" name="text" rows="5" placeholder="Write your thoughts here..." required></textarea>
+                            </div>
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary btn-lg px-5">
+                                    <i class="fas fa-heart me-2"></i> Analyze My Feelings
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Results Section with enhanced UI -->
+{% if result %}
+<section class="py-5 animate__animated animate__fadeIn result-section">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Your Analysis Results</h2>
+            <p class="lead text-muted">Here's what we found in your text</p>
+        </div>
+        <div class="row">
+            <!-- Sentiment Results with improved visualization -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 shadow-lg border-0">
+                    <div class="card-header bg-{{ result.sentiment_label }} text-white">
+                        <h3 class="m-0"><i class="fas fa-chart-bar me-2"></i> Sentiment Analysis</h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="mb-4">
+                            <div class="meter-scale position-relative rounded-pill">
+                                {% with intensity_percentage=result.intensity|add:1|multiply:50 %}
+                                <div class="meter-pointer position-absolute" style="left: {{ intensity_percentage }}%;"></div>
+                                {% endwith %}
+                            </div>
+                            <div class="d-flex justify-content-between mt-2">
+                                <span class="fw-bold text-danger">Negative</span>
+                                <span class="fw-bold">Neutral</span>
+                                <span class="fw-bold text-success">Positive</span>
+                            </div>
+                        </div>
+                        <ul class="list-unstyled result-details">
+                            <li class="mb-3 d-flex align-items-center">
+                                <div class="result-icon result-{{ result.sentiment_label }} me-3">
+                                    <i class="fas fa-face-{% if result.sentiment_label == 'positive' %}smile{% elif result.sentiment_label == 'negative' %}frown{% else %}meh{% endif %}"></i>
+                                </div>
+                                <div>
+                                    <strong class="d-block">Overall Sentiment:</strong>
+                                    <span class="fs-5 sentiment-value">{{ result.sentiment_label|title }}</span>
+                                </div>
+                            </li>
+                            <li class="mb-3 d-flex align-items-center">
+                                <div class="result-icon result-primary me-3">
+                                    <i class="fas fa-chart-bar"></i>
+                                </div>
+                                <div>
+                                    <strong class="d-block">Intensity Score:</strong>
+                                    <span class="fs-5 sentiment-value">{{ result.intensity|floatformat:2 }}</span>
+                                </div>
+                            </li>
+                            <li class="d-flex align-items-center">
+                                <div class="result-icon result-emotion me-3">
+                                    <i class="fas fa-heart"></i>
+                                </div>
+                                <div>
+                                    <strong class="d-block">Primary Emotion:</strong>
+                                    <span class="fs-5 sentiment-value">{{ result.emotion|title }}</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <!-- Suggestions with card improvements -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 shadow-lg border-0">
+                    <div class="card-header bg-info text-white">
+                        <h3 class="m-0"><i class="fas fa-lightbulb me-2"></i> Self-Care Suggestions</h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="suggestions-container">
+                            {% for suggestion in suggestions %}
+                            <div class="suggestion-item mb-3">
+                                <div class="suggestion-header d-flex align-items-center mb-2">
+                                    <div class="suggestion-icon me-3">
+                                        <i class="fas {{ suggestion.icon }}"></i>
+                                    </div>
+                                    <h5 class="mb-0">{{ suggestion.category|title }}</h5>
+                                </div>
+                                <p class="mb-0 ps-5">{{ suggestion.text }}</p>
+                            </div>
+                            {% if not forloop.last %}<hr class="my-3">{% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="card-footer text-center">
+                        <span class="text-muted">Based on your detected emotion:</span>
+                        <strong class="ms-2 emotion-highlight">{{ result.emotion|title }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Show error with better styling -->
+{% if error %}
+<div class="container my-4 animate__animated animate__fadeIn">
+    <div class="alert alert-danger d-flex align-items-center">
+        <i class="fas fa-exclamation-triangle me-3 fa-lg"></i>
+        <div>{{ error }}</div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Trends Section with improved charts -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2>Your Sentiment Trends</h2>
+            <p class="lead text-muted">Track how your emotions have changed over time</p>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="m-0"><i class="fas fa-chart-line me-2"></i> Daily Sentiment Trend</h3>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="dailySentimentChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-success text-white">
+                        <h3 class="m-0"><i class="fas fa-chart-pie me-2"></i> Emotion Distribution</h3>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="emotionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-warning text-dark">
+                        <h3 class="m-0"><i class="fas fa-chart-bar me-2"></i> Sentiment Distribution</h3>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="sentimentChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Information Section (New) -->
+<section id="info-section" class="py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6 mb-4 mb-md-0 animate__animated animate__fadeInLeft">
+                <img src="{% static 'sentiment_analysis/img/Mental-health-illustration.jpeg' %}" class="img-fluid rounded shadow" alt="Mental Health Illustration">
+            </div>
+            <div class="col-md-6 animate__animated animate__fadeInRight">
+                <h2 class="mb-4">Why Mental Health Matters</h2>
+                <p class="mb-4">Mental health includes our emotional, psychological, and social well-being. It affects how we think, feel, and act. It also helps determine how we handle stress, relate to others, and make choices.</p>
+                <div class="card bg-light mb-3">
+                    <div class="card-body">
+                        <h5 class="d-flex align-items-center"><i class="fas fa-brain me-2 text-primary"></i> About Sentiment Analysis</h5>
+                        <p class="mb-0">Our sentiment analysis tool uses advanced natural language processing to detect emotions in your text and provide personalized insights and suggestions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+
+<!-- Pass data to JavaScript -->
+<script>
+    // Make data available to external JS file
+    const dailyLabels = JSON.parse('{{ sentiment_trends.daily_averages|escapejs }}').labels;
+    const dailyData = JSON.parse('{{ sentiment_trends.daily_averages|escapejs }}').data;
+    
+    const emotionLabels = JSON.parse('{{ sentiment_trends.emotion_distribution|escapejs }}').labels;
+    const emotionData = JSON.parse('{{ sentiment_trends.emotion_distribution|escapejs }}').data;
+    
+    const sentimentLabels = JSON.parse('{{ sentiment_trends.sentiment_distribution|escapejs }}').labels;
+    const sentimentData = JSON.parse('{{ sentiment_trends.sentiment_distribution|escapejs }}').data;
+</script>
+
+<!-- Include external JS file -->
+<script src="{% static 'sentiment_analysis/js/sentiment_charts.js' %}"></script>
+{% endblock %}
